@@ -12,8 +12,7 @@ class AppStrings {
       'https://www.linkedin.com/in/rutvik-b-nakum-376707237/'; // ← બદલો
   static const String github = 'https://github.com/rutviknakum'; // ← બદલો
   static const String googleScholar = 'https://scholar.google.com/'; // ← બદલો
-  static const String resumeUrl = 'assets/documents/resume.pdf';
-
+  static const String resumeUrl = 'resume.pdf';
   // About
   static const String aboutText =
       'I am Rutvik B. Nakum, an IT professional and Flutter Developer '

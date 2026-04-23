@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'dart:html' as html;
 import '../constants/app_colors.dart';
 import '../constants/app_strings.dart';
 
@@ -204,11 +205,10 @@ class _HeroSectionState extends State<HeroSection>
             spacing: 14,
             runSpacing: 12,
             children: [
-              _primaryButton('Download CV', Icons.download_rounded, () async {
-                final Uri url = Uri.parse(AppStrings.resumeUrl);
-                if (await canLaunchUrl(url)) {
-                  await launchUrl(url, mode: LaunchMode.externalApplication);
-                }
+              _primaryButton('Download CV', Icons.download_rounded, () {
+                html.AnchorElement(href: 'resume.pdf')
+                  ..download = 'Rutvik_Nakum_Resume.pdf'
+                  ..click();
               }),
               _outlineButton(
                 'Contact Me',
