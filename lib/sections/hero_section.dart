@@ -204,11 +204,12 @@ class _HeroSectionState extends State<HeroSection>
             spacing: 14,
             runSpacing: 12,
             children: [
-              _primaryButton(
-                'Download CV',
-                Icons.download_rounded,
-                () => launchUrl(Uri.parse(AppStrings.resumeUrl)),
-              ),
+              _primaryButton('Download CV', Icons.download_rounded, () async {
+                final Uri url = Uri.parse(AppStrings.resumeUrl);
+                if (await canLaunchUrl(url)) {
+                  await launchUrl(url, mode: LaunchMode.externalApplication);
+                }
+              }),
               _outlineButton(
                 'Contact Me',
                 Icons.mail_outline_rounded,
