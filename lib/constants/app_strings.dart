@@ -7,7 +7,7 @@ class AppStrings {
   static const String university = 'ITM SLS Baroda University'; // ← બદલો
   static const String tagline = 'Researcher  |  Educator  |  Flutter Developer';
   static const String email = 'rutvikb.nakum21@gmail.com'; // ← બદલો
-  static const String phone = '+91 8490008691  | +91 9316359565'; // ← બદલો
+  static const String phone = '+91 8490008691'; // ← બદલો
   static const String linkedIn =
       'https://www.linkedin.com/in/rutvik-b-nakum-376707237/'; // ← બદલો
   static const String github = 'https://github.com/rutviknakum'; // ← બદલો

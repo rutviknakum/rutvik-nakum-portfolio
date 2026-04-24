@@ -5,9 +5,9 @@ import '../models/course_model.dart';
 
 class CourseCard extends StatefulWidget {
   final Course course;
-  final VoidCallback? onTap; // ← NEW
+  final VoidCallback? onTap;
 
-  const CourseCard({super.key, required this.course, this.onTap}); // ← NEW
+  const CourseCard({super.key, required this.course, this.onTap});
 
   @override
   State<CourseCard> createState() => _CourseCardState();
@@ -16,19 +16,26 @@ class CourseCard extends StatefulWidget {
 class _CourseCardState extends State<CourseCard> {
   bool _hovered = false;
 
+  // ✅ Fix 1: PostFrameCallback — mouse tracker assertion error fix
+  void _setHovered(bool value) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() => _hovered = value);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
+      onEnter: (_) => _setHovered(true),
+      onExit: (_) => _setHovered(false),
       child: GestureDetector(
-        onTap: widget.onTap, // ← Click handler
+        onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOutCubic,
           transform: Matrix4.translationValues(0, _hovered ? -4 : 0, 0),
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(16), // ✅ Fix 2: 20→16 padding reduce
           decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(12),
@@ -50,7 +57,9 @@ class _CourseCardState extends State<CourseCard> {
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min, // ✅ Fix 3: min size
             children: [
+              // ── Top Row: Badge + Year ──
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -58,10 +67,10 @@ class _CourseCardState extends State<CourseCard> {
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
-                      vertical: 4,
+                      vertical: 3, // ✅ Fix 4: 4→3
                     ),
                     decoration: BoxDecoration(
-                      color: widget.course.level == 'PG'
+                      color: widget.course.level.contains('PG')
                           ? AppColors.warning.withValues(alpha: 0.15)
                           : AppColors.primary.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(20),
@@ -71,7 +80,7 @@ class _CourseCardState extends State<CourseCard> {
                       style: GoogleFonts.poppins(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
-                        color: widget.course.level == 'PG'
+                        color: widget.course.level.contains('PG')
                             ? AppColors.warning
                             : AppColors.primary,
                       ),
@@ -82,12 +91,11 @@ class _CourseCardState extends State<CourseCard> {
                       Text(
                         widget.course.year,
                         style: GoogleFonts.roboto(
-                          fontSize: 12,
+                          fontSize: 11, // ✅ Fix 5: 12→11
                           color: AppColors.textMuted,
                         ),
                       ),
                       const SizedBox(width: 6),
-                      // ← "Tap" hint arrow
                       AnimatedOpacity(
                         duration: const Duration(milliseconds: 200),
                         opacity: _hovered ? 1.0 : 0.0,
@@ -101,39 +109,53 @@ class _CourseCardState extends State<CourseCard> {
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 8), // ✅ Fix 6: 10→8
+              // ── Course Name ──
               Text(
                 widget.course.name,
                 style: GoogleFonts.poppins(
-                  fontSize: 16,
+                  fontSize: 14, // ✅ Fix 7: 16→14
                   fontWeight: FontWeight.w600,
                   color: _hovered ? AppColors.primary : AppColors.textPrimary,
                 ),
+                maxLines: 2, // ✅ Fix 8: overflow prevent
+                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 6),
+
+              // ── Code + Semester ──
               Row(
                 children: [
-                  const Icon(Icons.code, size: 14, color: AppColors.textMuted),
-                  const SizedBox(width: 4),
-                  Text(
-                    widget.course.code,
-                    style: GoogleFonts.roboto(
-                      fontSize: 13,
-                      color: AppColors.textMuted,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
                   const Icon(
-                    Icons.calendar_today,
-                    size: 14,
+                    Icons.code,
+                    size: 13, // ✅ Fix 9: 14→13
                     color: AppColors.textMuted,
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    widget.course.semester,
+                    widget.course.code,
                     style: GoogleFonts.roboto(
-                      fontSize: 13,
+                      fontSize: 12, // ✅ Fix 10: 13→12
                       color: AppColors.textMuted,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Icon(
+                    Icons.calendar_today,
+                    size: 13,
+                    color: AppColors.textMuted,
+                  ),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    // ✅ Fix 11: Expanded wrap
+                    child: Text(
+                      widget.course.semester,
+                      style: GoogleFonts.roboto(
+                        fontSize: 12,
+                        color: AppColors.textMuted,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],

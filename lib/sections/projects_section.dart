@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:animate_do/animate_do.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../constants/app_colors.dart';
 import '../data/projects_data.dart';
@@ -18,7 +17,11 @@ class _ProjectsSectionState extends State<ProjectsSection> {
 
   List get _filtered => _filter == 'all'
       ? projectsList
-      : projectsList.where((p) => p.type == _filter).toList();
+      : projectsList
+            .where(
+              (p) => p.type.toString().toLowerCase() == _filter.toLowerCase(),
+            )
+            .toList();
 
   @override
   Widget build(BuildContext context) {
@@ -34,27 +37,25 @@ class _ProjectsSectionState extends State<ProjectsSection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          FadeInDown(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                const SectionTitle(title: 'Projects'),
-                Text(
-                  '${_filtered.length} project${_filtered.length != 1 ? 's' : ''}',
-                  style: GoogleFonts.roboto(
-                    fontSize: 14,
-                    color: AppColors.textMuted,
-                  ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              const SectionTitle(title: 'Projects'),
+              Text(
+                '${_filtered.length} project${_filtered.length != 1 ? 's' : ''}',
+                style: GoogleFonts.roboto(
+                  fontSize: 14,
+                  color: AppColors.textMuted,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
           const SizedBox(height: 24),
-          FadeInUp(child: _filterRow(isMobile)),
+          _filterRow(),
           const SizedBox(height: 36),
           AnimatedSwitcher(
-            duration: const Duration(milliseconds: 400),
+            duration: const Duration(milliseconds: 300),
             transitionBuilder: (child, animation) =>
                 FadeTransition(opacity: animation, child: child),
             child: isMobile
@@ -66,7 +67,7 @@ class _ProjectsSectionState extends State<ProjectsSection> {
     );
   }
 
-  Widget _filterRow(bool isMobile) {
+  Widget _filterRow() {
     final filters = [
       {'key': 'all', 'label': 'All Projects', 'icon': Icons.grid_view_rounded},
       {'key': 'academic', 'label': 'Academic', 'icon': Icons.school_outlined},
@@ -129,6 +130,8 @@ class _ProjectsSectionState extends State<ProjectsSection> {
 
   Widget _desktopGrid({Key? key}) {
     final projects = _filtered;
+    if (projects.isEmpty) return _emptyState(key: key);
+
     return GridView.builder(
       key: key,
       shrinkWrap: true,
@@ -137,21 +140,20 @@ class _ProjectsSectionState extends State<ProjectsSection> {
         crossAxisCount: 2,
         crossAxisSpacing: 24,
         mainAxisSpacing: 24,
-        childAspectRatio: 1.55,
+        childAspectRatio: 1.9, //
       ),
       itemCount: projects.length,
-      itemBuilder: (_, i) => FadeInUp(
-        delay: Duration(milliseconds: i * 100),
-        child: _ProjectCard(
-          project: projects[i],
-          onTap: () => _showProjectDetail(context, projects[i]),
-        ),
+      itemBuilder: (_, i) => _ProjectCard(
+        project: projects[i],
+        onTap: () => _showProjectDetail(context, projects[i]),
       ),
     );
   }
 
   Widget _mobileList({Key? key}) {
     final projects = _filtered;
+    if (projects.isEmpty) return _emptyState(key: key);
+
     return Column(
       key: key,
       children: projects
@@ -160,12 +162,9 @@ class _ProjectsSectionState extends State<ProjectsSection> {
           .map(
             (e) => Padding(
               padding: const EdgeInsets.only(bottom: 20),
-              child: FadeInUp(
-                delay: Duration(milliseconds: e.key * 100),
-                child: _ProjectCard(
-                  project: e.value,
-                  onTap: () => _showProjectDetail(context, e.value),
-                ),
+              child: _ProjectCard(
+                project: e.value,
+                onTap: () => _showProjectDetail(context, e.value),
               ),
             ),
           )
@@ -173,12 +172,36 @@ class _ProjectsSectionState extends State<ProjectsSection> {
     );
   }
 
-  // ─── Project Detail Dialog ────────────────────────────────
+  Widget _emptyState({Key? key}) {
+    return Center(
+      key: key,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 60),
+        child: Column(
+          children: [
+            Icon(
+              Icons.folder_open_outlined,
+              size: 48,
+              color: AppColors.textMuted.withValues(alpha: 0.4),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No projects found',
+              style: GoogleFonts.poppins(
+                fontSize: 15,
+                color: AppColors.textMuted,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _showProjectDetail(BuildContext context, dynamic project) {
     final isMobile = MediaQuery.of(context).size.width < 800;
-
     if (isMobile) {
-      // Mobile: Bottom Sheet
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
@@ -186,7 +209,6 @@ class _ProjectsSectionState extends State<ProjectsSection> {
         builder: (_) => _ProjectDetailSheet(project: project),
       );
     } else {
-      // Desktop: Dialog
       showDialog(
         context: context,
         builder: (_) => _ProjectDetailDialog(project: project),
@@ -195,10 +217,10 @@ class _ProjectsSectionState extends State<ProjectsSection> {
   }
 }
 
-// ─── Project Card Widget ──────────────────────────────────────
+// ─── Project Card ─────────────────────────────────────────────
 class _ProjectCard extends StatefulWidget {
   final dynamic project;
-  final VoidCallback onTap; // ← NEW
+  final VoidCallback onTap;
 
   const _ProjectCard({required this.project, required this.onTap});
 
@@ -209,8 +231,13 @@ class _ProjectCard extends StatefulWidget {
 class _ProjectCardState extends State<_ProjectCard> {
   bool _hovered = false;
 
+  // ✅ Fix: PostFrameCallback દૂર — direct setState
+  void _setHovered(bool value) {
+    if (mounted) setState(() => _hovered = value);
+  }
+
   Color get _typeColor {
-    switch (widget.project.type) {
+    switch (widget.project.type.toString().toLowerCase()) {
       case 'academic':
         return AppColors.primary;
       case 'personal':
@@ -221,7 +248,7 @@ class _ProjectCardState extends State<_ProjectCard> {
   }
 
   String get _typeLabel {
-    switch (widget.project.type) {
+    switch (widget.project.type.toString().toLowerCase()) {
       case 'academic':
         return 'ACADEMIC';
       case 'personal':
@@ -234,11 +261,11 @@ class _ProjectCardState extends State<_ProjectCard> {
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      cursor: SystemMouseCursors.click, // ← pointer cursor
+      onEnter: (_) => _setHovered(true),
+      onExit: (_) => _setHovered(false),
+      cursor: SystemMouseCursors.click,
       child: GestureDetector(
-        onTap: widget.onTap, // ← Click handler
+        onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 250),
           curve: Curves.easeOutCubic,
@@ -263,10 +290,12 @@ class _ProjectCardState extends State<_ProjectCard> {
             ],
           ),
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
+                // ── Top Row ── ✅ Fix: Flexible add — right overflow fix
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -285,60 +314,72 @@ class _ProjectCardState extends State<_ProjectCard> {
                         size: 20,
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _typeColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        _typeLabel,
-                        style: GoogleFonts.poppins(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          color: _typeColor,
-                          letterSpacing: 1.2,
+                    const SizedBox(width: 8),
+                    Flexible(
+                      // ✅ Fix: badge overflow રોક્યો
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _typeColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          _typeLabel,
+                          style: GoogleFonts.poppins(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: _typeColor,
+                            letterSpacing: 1.2,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
+
+                // ── Title ──
                 Text(
                   widget.project.title as String,
                   style: GoogleFonts.poppins(
-                    fontSize: 17,
+                    fontSize: 15,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
                     height: 1.3,
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 8),
-                Expanded(
-                  child: Text(
-                    widget.project.description as String,
-                    style: GoogleFonts.roboto(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
-                      height: 1.6,
-                    ),
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
+
+                // ── Description ── ✅ Fix: Expanded દૂર
+                Text(
+                  widget.project.description as String,
+                  style: GoogleFonts.roboto(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                    height: 1.6,
                   ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
+
+                // ── Tech Tags ──
                 Wrap(
                   spacing: 6,
                   runSpacing: 6,
                   children: (widget.project.technologies as List)
+                      .take(3)
                       .map(
                         (tech) => Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
+                            horizontal: 8,
+                            vertical: 3,
                           ),
                           decoration: BoxDecoration(
                             color: AppColors.surfaceAlt,
@@ -350,7 +391,7 @@ class _ProjectCardState extends State<_ProjectCard> {
                           child: Text(
                             tech as String,
                             style: GoogleFonts.roboto(
-                              fontSize: 11,
+                              fontSize: 10,
                               color: AppColors.textMuted,
                               fontWeight: FontWeight.w500,
                             ),
@@ -359,21 +400,23 @@ class _ProjectCardState extends State<_ProjectCard> {
                       )
                       .toList(),
                 ),
-                const SizedBox(height: 12),
-                // ── "Tap to view details" hint ──
+                const SizedBox(height: 10),
+
+                // ── Tap hint ──
                 Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
                       Icons.touch_app_outlined,
-                      size: 13,
-                      color: AppColors.primary.withValues(alpha: 0.6),
+                      size: 12,
+                      color: AppColors.primary.withValues(alpha: 0.5),
                     ),
-                    const SizedBox(width: 5),
+                    const SizedBox(width: 4),
                     Text(
                       'Tap for details',
                       style: GoogleFonts.roboto(
-                        fontSize: 11,
-                        color: AppColors.primary.withValues(alpha: 0.6),
+                        fontSize: 10,
+                        color: AppColors.primary.withValues(alpha: 0.5),
                         fontStyle: FontStyle.italic,
                       ),
                     ),
@@ -394,7 +437,7 @@ class _ProjectDetailDialog extends StatelessWidget {
   const _ProjectDetailDialog({required this.project});
 
   Color get _typeColor {
-    switch (project.type) {
+    switch (project.type.toString().toLowerCase()) {
       case 'academic':
         return AppColors.primary;
       case 'personal':
@@ -426,7 +469,6 @@ class _ProjectDetailDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // ── Header ──
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
@@ -467,8 +509,8 @@ class _ProjectDetailDialog extends StatelessWidget {
                             color: AppColors.textPrimary,
                           ),
                         ),
+                        const SizedBox(height: 4),
                         Container(
-                          margin: const EdgeInsets.only(top: 4),
                           padding: const EdgeInsets.symmetric(
                             horizontal: 10,
                             vertical: 3,
@@ -490,7 +532,6 @@ class _ProjectDetailDialog extends StatelessWidget {
                       ],
                     ),
                   ),
-                  // Close button
                   IconButton(
                     onPressed: () => Navigator.pop(context),
                     icon: const Icon(Icons.close_rounded),
@@ -499,15 +540,12 @@ class _ProjectDetailDialog extends StatelessWidget {
                 ],
               ),
             ),
-
-            // ── Scrollable Body ──
             Flexible(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Description
                     Text(
                       'About this Project',
                       style: GoogleFonts.poppins(
@@ -527,8 +565,6 @@ class _ProjectDetailDialog extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 24),
-
-                    // Technologies
                     Text(
                       'Technologies Used',
                       style: GoogleFonts.poppins(
@@ -573,8 +609,6 @@ class _ProjectDetailDialog extends StatelessWidget {
                           .toList(),
                     ),
                     const SizedBox(height: 24),
-
-                    // Action Buttons
                     Row(
                       children: [
                         if ((project.githubUrl as String).isNotEmpty)
@@ -617,7 +651,7 @@ class _ProjectDetailSheet extends StatelessWidget {
   const _ProjectDetailSheet({required this.project});
 
   Color get _typeColor {
-    switch (project.type) {
+    switch (project.type.toString().toLowerCase()) {
       case 'academic':
         return AppColors.primary;
       case 'personal':
@@ -641,7 +675,6 @@ class _ProjectDetailSheet extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Drag Handle
           Container(
             margin: const EdgeInsets.only(top: 12, bottom: 8),
             width: 40,
@@ -651,8 +684,6 @@ class _ProjectDetailSheet extends StatelessWidget {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-
-          // Header
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             child: Row(
@@ -674,7 +705,7 @@ class _ProjectDetailSheet extends StatelessWidget {
                   child: Text(
                     project.title as String,
                     style: GoogleFonts.poppins(
-                      fontSize: 18,
+                      fontSize: 17,
                       fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary,
                     ),
@@ -688,11 +719,9 @@ class _ProjectDetailSheet extends StatelessWidget {
               ],
             ),
           ),
-
-          // Body
           Flexible(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -744,8 +773,6 @@ class _ProjectDetailSheet extends StatelessWidget {
                         .toList(),
                   ),
                   const SizedBox(height: 20),
-
-                  // Buttons
                   if ((project.githubUrl as String).isNotEmpty)
                     _DetailActionButton(
                       icon: Icons.code_rounded,
@@ -764,6 +791,7 @@ class _ProjectDetailSheet extends StatelessWidget {
                       fullWidth: true,
                     ),
                   ],
+                  const SizedBox(height: 8),
                 ],
               ),
             ),
@@ -774,7 +802,7 @@ class _ProjectDetailSheet extends StatelessWidget {
   }
 }
 
-// ─── Action Button (Shared) ───────────────────────────────────
+// ─── Action Button ────────────────────────────────────────────
 class _DetailActionButton extends StatelessWidget {
   final IconData icon;
   final String label;

@@ -40,8 +40,9 @@ class _HeroSectionState extends State<HeroSection>
       width: double.infinity,
       decoration: const BoxDecoration(gradient: AppColors.heroGradient),
       child: Stack(
+        clipBehavior: Clip.hardEdge, // ✅ Fix: overflow clip
         children: [
-          // ── Background Decorations ───────────────
+          // ── Background Decorations ──
           Positioned(
             right: -60,
             top: -60,
@@ -53,11 +54,11 @@ class _HeroSectionState extends State<HeroSection>
             child: _glowCircle(200, AppColors.primary.withOpacity(0.04)),
           ),
 
-          // ── Main Content ─────────────────────────
+          // ── Main Content ──
           Padding(
             padding: EdgeInsets.symmetric(
-              horizontal: isMobile ? 24 : 80,
-              vertical: isMobile ? 60 : 100,
+              horizontal: isMobile ? 20 : 80, // ✅ Fix: 24→20 mobile
+              vertical: isMobile ? 48 : 100, // ✅ Fix: 60→48 mobile
             ),
             child: isMobile ? _mobileLayout() : _desktopLayout(),
           ),
@@ -74,7 +75,7 @@ class _HeroSectionState extends State<HeroSection>
     );
   }
 
-  // ─── Layouts ──────────────────────────────────────────────
+  // ─── Layouts ─────────────────────────────────────────────
   Widget _desktopLayout() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -90,11 +91,15 @@ class _HeroSectionState extends State<HeroSection>
   Widget _mobileLayout() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
-      children: [_profileArea(), const SizedBox(height: 40), _textContent()],
+      children: [
+        _profileArea(),
+        const SizedBox(height: 32), // ✅ Fix: 40→32
+        _textContent(),
+      ],
     );
   }
 
-  // ─── Text Content ─────────────────────────────────────────
+  // ─── Text Content ────────────────────────────────────────
   Widget _textContent() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -104,7 +109,7 @@ class _HeroSectionState extends State<HeroSection>
           duration: const Duration(milliseconds: 500),
           child: _statusPill(),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 20),
 
         // Hello
         FadeInLeft(
@@ -112,34 +117,41 @@ class _HeroSectionState extends State<HeroSection>
           child: Text(
             AppStrings.heroSection,
             style: GoogleFonts.roboto(
-              fontSize: 16,
+              fontSize: 14, // ✅ Fix: 16→14 mobile safe
               color: AppColors.primary,
               letterSpacing: 3,
               fontWeight: FontWeight.w500,
             ),
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 8),
 
         // Name
         FadeInLeft(
           delay: const Duration(milliseconds: 200),
-          child: Text(
-            AppStrings.name,
-            style: GoogleFonts.poppins(
-              fontSize: 50,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-              height: 1.1,
-            ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // ✅ Fix: fluid font size
+              final fontSize = constraints.maxWidth < 400 ? 36.0 : 46.0;
+              return Text(
+                AppStrings.name,
+                style: GoogleFonts.poppins(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                  height: 1.1,
+                ),
+              );
+            },
           ),
         ),
         const SizedBox(height: 14),
 
-        // Title + Department
+        // ✅ Fix: Title + Department — Expanded wrap
         FadeInLeft(
           delay: const Duration(milliseconds: 350),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
                 width: 3,
@@ -149,37 +161,44 @@ class _HeroSectionState extends State<HeroSection>
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(width: 14),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    AppStrings.title,
-                    style: GoogleFonts.poppins(
-                      fontSize: 20,
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
+              const SizedBox(width: 12),
+              Expanded(
+                // ✅ KEY FIX: overflow prevent
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      AppStrings.title,
+                      style: GoogleFonts.poppins(
+                        fontSize: 17, // ✅ Fix: 20→17
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  Text(
-                    AppStrings.university,
-                    style: GoogleFonts.roboto(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
+                    Text(
+                      AppStrings.university,
+                      style: GoogleFonts.roboto(
+                        fontSize: 12, // ✅ Fix: 13→12
+                        color: AppColors.textSecondary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 18),
 
         // Tagline
         FadeInLeft(
           delay: const Duration(milliseconds: 500),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
               color: AppColors.primary.withOpacity(0.08),
               borderRadius: BorderRadius.circular(8),
@@ -188,7 +207,7 @@ class _HeroSectionState extends State<HeroSection>
             child: Text(
               AppStrings.tagline,
               style: GoogleFonts.roboto(
-                fontSize: 14,
+                fontSize: 13, // ✅ Fix: 14→13
                 color: AppColors.textSecondary,
                 fontStyle: FontStyle.italic,
                 height: 1.5,
@@ -196,14 +215,14 @@ class _HeroSectionState extends State<HeroSection>
             ),
           ),
         ),
-        const SizedBox(height: 32),
+        const SizedBox(height: 28),
 
         // Buttons
         FadeInUp(
           delay: const Duration(milliseconds: 600),
           child: Wrap(
-            spacing: 14,
-            runSpacing: 12,
+            spacing: 12,
+            runSpacing: 10,
             children: [
               _primaryButton('Download CV', Icons.download_rounded, () {
                 html.AnchorElement(href: 'resume.pdf')
@@ -218,24 +237,25 @@ class _HeroSectionState extends State<HeroSection>
             ],
           ),
         ),
-        const SizedBox(height: 32),
+        const SizedBox(height: 28),
 
-        // Quick Stats Row
+        // Quick Stats
         FadeInUp(
           delay: const Duration(milliseconds: 700),
           child: _quickStats(),
         ),
-        const SizedBox(height: 28),
+        const SizedBox(height: 24),
 
         // Social Icons
         FadeInUp(
           delay: const Duration(milliseconds: 800),
-          child: Row(
+          child: Wrap(
+            // ✅ Fix: Row→Wrap (overflow safe)
+            spacing: 8,
+            runSpacing: 8,
             children: [
               _socialChip(Icons.work_outline, 'LinkedIn', AppStrings.linkedIn),
-              const SizedBox(width: 10),
               _socialChip(Icons.code_rounded, 'GitHub', AppStrings.github),
-              const SizedBox(width: 10),
               _socialChip(
                 Icons.school_outlined,
                 'Scholar',
@@ -248,12 +268,12 @@ class _HeroSectionState extends State<HeroSection>
     );
   }
 
-  // ─── Status Pill ──────────────────────────────────────────
+  // ─── Status Pill ─────────────────────────────────────────
   Widget _statusPill() {
     return AnimatedBuilder(
       animation: _pulseController,
       builder: (_, __) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(20),
@@ -275,12 +295,16 @@ class _HeroSectionState extends State<HeroSection>
               ),
             ),
             const SizedBox(width: 8),
-            Text(
-              'Open to collaborations & research',
-              style: GoogleFonts.roboto(
-                fontSize: 12,
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.w500,
+            Flexible(
+              // ✅ Fix: Flexible wrap
+              child: Text(
+                'Open to collaborations & research',
+                style: GoogleFonts.roboto(
+                  fontSize: 11, // ✅ Fix: 12→11
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -289,7 +313,7 @@ class _HeroSectionState extends State<HeroSection>
     );
   }
 
-  // ─── Quick Stats ──────────────────────────────────────────
+  // ─── Quick Stats ─────────────────────────────────────────
   Widget _quickStats() {
     final stats = [
       {'value': '1+', 'label': 'Year\nTeaching'},
@@ -298,9 +322,11 @@ class _HeroSectionState extends State<HeroSection>
     ];
 
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: stats.asMap().entries.map((e) {
         final isLast = e.key == stats.length - 1;
         return Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -308,7 +334,7 @@ class _HeroSectionState extends State<HeroSection>
                 Text(
                   e.value['value']!,
                   style: GoogleFonts.poppins(
-                    fontSize: 22,
+                    fontSize: 20, // ✅ Fix: 22→20
                     fontWeight: FontWeight.bold,
                     color: AppColors.primary,
                   ),
@@ -316,7 +342,7 @@ class _HeroSectionState extends State<HeroSection>
                 Text(
                   e.value['label']!,
                   style: GoogleFonts.roboto(
-                    fontSize: 11,
+                    fontSize: 10, // ✅ Fix: 11→10
                     color: AppColors.textMuted,
                     height: 1.4,
                   ),
@@ -326,8 +352,8 @@ class _HeroSectionState extends State<HeroSection>
             if (!isLast)
               Container(
                 width: 1,
-                height: 36,
-                margin: const EdgeInsets.symmetric(horizontal: 20),
+                height: 32,
+                margin: const EdgeInsets.symmetric(horizontal: 16),
                 color: AppColors.primary.withOpacity(0.2),
               ),
           ],
@@ -336,8 +362,13 @@ class _HeroSectionState extends State<HeroSection>
     );
   }
 
-  // ─── Profile Area ─────────────────────────────────────────
+  // ─── Profile Area ────────────────────────────────────────
   Widget _profileArea() {
+    final isMobile = MediaQuery.of(context).size.width < 800;
+    // ✅ Fix: mobile માં smaller photo
+    final photoSize = isMobile ? 220.0 : 300.0;
+    final ringSize = isMobile ? 236.0 : 320.0;
+
     return FadeInRight(
       duration: const Duration(milliseconds: 800),
       child: Center(
@@ -348,8 +379,8 @@ class _HeroSectionState extends State<HeroSection>
             AnimatedBuilder(
               animation: _pulseController,
               builder: (_, __) => Container(
-                width: 310 + (_pulseController.value * 10),
-                height: 310 + (_pulseController.value * 10),
+                width: ringSize + (_pulseController.value * 8),
+                height: ringSize + (_pulseController.value * 8),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
@@ -364,8 +395,8 @@ class _HeroSectionState extends State<HeroSection>
 
             // Photo circle
             Container(
-              width: 300,
-              height: 300,
+              width: photoSize,
+              height: photoSize,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(color: AppColors.primary, width: 3),
@@ -383,9 +414,9 @@ class _HeroSectionState extends State<HeroSection>
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) => Container(
                     color: AppColors.surfaceAlt,
-                    child: const Icon(
+                    child: Icon(
                       Icons.person_rounded,
-                      size: 100,
+                      size: isMobile ? 70 : 100,
                       color: AppColors.primary,
                     ),
                   ),
@@ -395,15 +426,15 @@ class _HeroSectionState extends State<HeroSection>
 
             // Flutter badge
             Positioned(
-              bottom: 16,
-              right: 8,
+              bottom: isMobile ? 8 : 16,
+              right: isMobile ? 0 : 8,
               child: _badgeChip(Icons.flutter_dash, 'Flutter Dev'),
             ),
 
             // Professor badge
             Positioned(
-              top: 24,
-              right: 0,
+              top: isMobile ? 10 : 24,
+              right: isMobile ? 0 : 0,
               child: _badgeChip(Icons.school_rounded, 'Asst. Prof'),
             ),
           ],
@@ -441,20 +472,20 @@ class _HeroSectionState extends State<HeroSection>
     );
   }
 
-  // ─── Buttons ──────────────────────────────────────────────
+  // ─── Buttons ────────────────────────────────────────────
   Widget _primaryButton(String label, IconData icon, VoidCallback onTap) {
     return ElevatedButton.icon(
       onPressed: onTap,
-      icon: Icon(icon, size: 17),
+      icon: Icon(icon, size: 16),
       label: Text(
         label,
-        style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600),
+        style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600),
       ),
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 0,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
@@ -463,15 +494,15 @@ class _HeroSectionState extends State<HeroSection>
   Widget _outlineButton(String label, IconData icon, VoidCallback onTap) {
     return OutlinedButton.icon(
       onPressed: onTap,
-      icon: Icon(icon, size: 17),
+      icon: Icon(icon, size: 16),
       label: Text(
         label,
-        style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w600),
+        style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600),
       ),
       style: OutlinedButton.styleFrom(
         foregroundColor: AppColors.primary,
         side: const BorderSide(color: AppColors.primary),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );

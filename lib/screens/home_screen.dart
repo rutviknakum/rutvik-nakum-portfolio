@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_portfolio/widgets/nav_bar.dart';
 import '../sections/hero_section.dart';
 import '../sections/about_section.dart';
 import '../sections/skills_section.dart';
@@ -7,7 +8,6 @@ import '../sections/courses_section.dart';
 import '../sections/projects_section.dart';
 import '../sections/achievements_section.dart';
 import '../sections/contact_section.dart';
-import '../widgets/nav_bar.dart';
 import '../widgets/footer.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -115,7 +115,7 @@ class _HomeScreenState extends State<HomeScreen> {
             top: 0,
             left: 0,
             right: 0,
-            child: NavBar(onNavTap: _scrollToSection),
+            child: Navbar(onNavTap: _scrollToSection),
           ),
         ],
       ),

@@ -24,15 +24,12 @@ class AboutSection extends StatelessWidget {
           const SectionTitle(title: 'About Me'),
           const SizedBox(height: 40),
 
-          // ── Bio + Education ──────────────────────
           isMobile ? _mobileLayout() : _desktopLayout(),
           const SizedBox(height: 64),
 
-          // ── Interests ───────────────────────────
           FadeInUp(child: _interestsRow()),
           const SizedBox(height: 64),
 
-          // ── Experience Timeline ──────────────────
           FadeInUp(
             delay: const Duration(milliseconds: 200),
             child: _experienceTimeline(),
@@ -69,7 +66,6 @@ class AboutSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Who Am I heading
         Row(
           children: [
             Container(
@@ -111,7 +107,6 @@ class AboutSection extends StatelessWidget {
         ),
         const SizedBox(height: 28),
 
-        // Quick Info
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
@@ -176,7 +171,7 @@ class AboutSection extends StatelessWidget {
           college: 'DA-IICT, Gandhinagar',
           year: '2023 – 2025',
           cpi: 'CPI: 6.05',
-          color: AppColors.primary,
+          color: AppColors.primary, // ✅ Primary
         ),
         const SizedBox(height: 14),
         _educationItem(
@@ -186,7 +181,7 @@ class AboutSection extends StatelessWidget {
           college: 'C.B Patel Computer College, Surat',
           year: '2020 – 2023',
           cpi: 'CPI: 6.17',
-          color: AppColors.warning,
+          color: AppColors.primary, // ✅ Same Primary (warning → primary)
         ),
       ],
     );
@@ -463,7 +458,6 @@ class AboutSection extends StatelessWidget {
           return Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Timeline dot + line
               SizedBox(
                 width: 24,
                 child: Column(
@@ -502,7 +496,6 @@ class AboutSection extends StatelessWidget {
               ),
               const SizedBox(width: 20),
 
-              // Content Card
               Expanded(
                 child: Container(
                   margin: const EdgeInsets.only(bottom: 20),
@@ -598,7 +591,6 @@ class AboutSection extends StatelessWidget {
                       ),
                       const SizedBox(height: 14),
 
-                      // Bullet Points
                       ...(exp['points'] as List<String>).map(
                         (point) => Padding(
                           padding: const EdgeInsets.only(bottom: 7),

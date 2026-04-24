@@ -35,7 +35,7 @@ class CoursesSection extends StatelessWidget {
                 crossAxisCount: isMobile ? 1 : 2,
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
-                childAspectRatio: isMobile ? 2.5 : 3,
+                childAspectRatio: isMobile ? 2.2 : 2.8,
               ),
               itemCount: coursesList.length,
               itemBuilder: (_, i) => CourseCard(
