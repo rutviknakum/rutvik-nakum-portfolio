@@ -77,7 +77,7 @@ class _CourseDialog extends StatelessWidget {
       backgroundColor: Colors.transparent,
       child: Container(
         width: 580,
-        constraints: const BoxConstraints(maxHeight: 640),
+        constraints: const BoxConstraints(maxHeight: 700),
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(20),
@@ -126,7 +126,6 @@ class _CourseSheet extends StatelessWidget {
         ),
         child: Column(
           children: [
-            // Drag handle
             Container(
               margin: const EdgeInsets.only(top: 12, bottom: 6),
               width: 40,
@@ -198,6 +197,7 @@ class _DialogHeader extends StatelessWidget {
                 const SizedBox(height: 6),
                 Wrap(
                   spacing: 6,
+                  runSpacing: 4,
                   children: [
                     _Pill(course.code),
                     _Pill(course.level),
@@ -285,7 +285,7 @@ class _CourseBody extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Year badge
+        // ── Year ──
         Row(
           children: [
             Icon(
@@ -305,9 +305,9 @@ class _CourseBody extends StatelessWidget {
         ),
         const SizedBox(height: 20),
 
-        // Description
+        // ── Description ──
         if (course.description.isNotEmpty) ...[
-          _Label('About this Course'),
+          _label('About this Course'),
           const SizedBox(height: 10),
           Text(
             course.description,
@@ -320,9 +320,9 @@ class _CourseBody extends StatelessWidget {
           const SizedBox(height: 24),
         ],
 
-        // Topics
+        // ── Topics ──
         if (course.topics.isNotEmpty) ...[
-          _Label('Topics Covered'),
+          _label('Topics Covered'),
           const SizedBox(height: 12),
           ...course.topics.asMap().entries.map(
             (e) => Padding(
@@ -367,35 +367,19 @@ class _CourseBody extends StatelessWidget {
           const SizedBox(height: 24),
         ],
 
-        // Drive Notes Button
+        // ── Study Resources ──
+        _label('Study Resources'),
+        const SizedBox(height: 12),
+
+        // Google Drive
         if (course.driveUrl.isNotEmpty)
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () async {
-                final uri = Uri.parse(course.driveUrl);
-                if (await canLaunchUrl(uri)) {
-                  await launchUrl(uri, mode: LaunchMode.externalApplication);
-                }
-              },
-              icon: const Icon(Icons.folder_open_rounded, size: 18),
-              label: Text(
-                'View Notes on Google Drive',
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-            ),
+          _ResourceButton(
+            icon: Icons.folder_open_rounded,
+            label: 'Notes on Google Drive',
+            url: course.driveUrl,
+            color: AppColors.primary,
+            fullWidth: true,
+            filled: true,
           )
         else
           Container(
@@ -428,11 +412,57 @@ class _CourseBody extends StatelessWidget {
               ],
             ),
           ),
+
+        // ── GFG + InterviewBit Row ──
+        if (course.gfgUrl.isNotEmpty || course.interviewBitUrl.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              if (course.gfgUrl.isNotEmpty)
+                Expanded(
+                  child: _ResourceButton(
+                    icon: Icons.article_outlined,
+                    label: 'GeeksForGeeks',
+                    url: course.gfgUrl,
+                    color: const Color(0xFF2F8D46),
+                    fullWidth: true,
+                    filled: false,
+                  ),
+                ),
+              if (course.gfgUrl.isNotEmpty && course.interviewBitUrl.isNotEmpty)
+                const SizedBox(width: 10),
+              if (course.interviewBitUrl.isNotEmpty)
+                Expanded(
+                  child: _ResourceButton(
+                    icon: Icons.psychology_outlined,
+                    label: 'InterviewBit',
+                    url: course.interviewBitUrl,
+                    color: const Color(0xFF1A73E8), // InterviewBit Blue
+                    fullWidth: true,
+                    filled: false,
+                  ),
+                ),
+            ],
+          ),
+        ],
+
+        // ── YouTube Playlists ──
+        if (course.youtubePlaylists.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          _label('YouTube Playlists'),
+          const SizedBox(height: 10),
+          ...course.youtubePlaylists.map(
+            (playlist) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: _YoutubePlaylistTile(playlist: playlist),
+            ),
+          ),
+        ],
       ],
     );
   }
 
-  Widget _Label(String text) {
+  Widget _label(String text) {
     return Text(
       text,
       style: GoogleFonts.poppins(
@@ -440,6 +470,168 @@ class _CourseBody extends StatelessWidget {
         fontWeight: FontWeight.w600,
         color: AppColors.primary,
         letterSpacing: 0.4,
+      ),
+    );
+  }
+}
+
+// ─── Resource Button ──────────────────────────────────────────
+class _ResourceButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String url;
+  final Color color;
+  final bool fullWidth;
+  final bool filled;
+
+  const _ResourceButton({
+    required this.icon,
+    required this.label,
+    required this.url,
+    required this.color,
+    this.fullWidth = false,
+    this.filled = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    void onPress() async {
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+    }
+
+    final buttonChild = Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: fullWidth ? MainAxisSize.max : MainAxisSize.min,
+      children: [
+        Icon(icon, size: 16, color: filled ? Colors.white : color),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: filled ? Colors.white : color,
+          ),
+        ),
+      ],
+    );
+
+    return SizedBox(
+      width: fullWidth ? double.infinity : null,
+      child: filled
+          ? ElevatedButton(
+              onPressed: onPress,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: color,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: buttonChild,
+            )
+          : OutlinedButton(
+              onPressed: onPress,
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                side: BorderSide(color: color.withValues(alpha: 0.5)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                backgroundColor: color.withValues(alpha: 0.05),
+              ),
+              child: buttonChild,
+            ),
+    );
+  }
+}
+
+// ─── YouTube Playlist Tile ────────────────────────────────────
+class _YoutubePlaylistTile extends StatefulWidget {
+  final YoutubePlaylist playlist;
+  const _YoutubePlaylistTile({required this.playlist});
+
+  @override
+  State<_YoutubePlaylistTile> createState() => _YoutubePlaylistTileState();
+}
+
+class _YoutubePlaylistTileState extends State<_YoutubePlaylistTile> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: () async {
+          final uri = Uri.parse(widget.playlist.url);
+          if (await canLaunchUrl(uri)) {
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+          }
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: _hovered
+                ? const Color(0xFFFF0000).withValues(alpha: 0.06)
+                : AppColors.surfaceAlt,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: _hovered
+                  ? const Color(0xFFFF0000).withValues(alpha: 0.4)
+                  : AppColors.primary.withValues(alpha: 0.12),
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF0000).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.play_circle_filled_rounded,
+                    size: 18,
+                    color: Color(0xFFFF0000),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  widget.playlist.title,
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: _hovered
+                        ? AppColors.textPrimary
+                        : AppColors.textSecondary,
+                  ),
+                ),
+              ),
+              AnimatedOpacity(
+                duration: const Duration(milliseconds: 200),
+                opacity: _hovered ? 1.0 : 0.35,
+                child: const Icon(
+                  Icons.open_in_new_rounded,
+                  size: 16,
+                  color: Color(0xFFFF0000),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

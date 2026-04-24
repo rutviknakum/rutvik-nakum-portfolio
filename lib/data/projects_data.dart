@@ -2,6 +2,33 @@ import '../models/project_model.dart';
 
 final List<Project> projectsList = [
   Project(
+    title: 'Smart AgroCare',
+    description:
+        'An AI-based crop disease detection and weather advisory system designed '
+        'to assist farmers in making data-driven decisions. The application allows '
+        'users to upload crop leaf images, where a trained machine learning model '
+        'analyzes and detects diseases with suggested treatments. It also integrates '
+        'real-time weather data to provide actionable insights such as irrigation timing, '
+        'pest control alerts, and crop planning recommendations. The system improves '
+        'agricultural productivity by enabling early detection and preventive measures.',
+    technologies: [
+      'Flutter',
+      'React.js',
+      'Node.js',
+      'Firebase',
+      'MongoDB',
+      'TensorFlow',
+      'Keras',
+      'OpenCV',
+      'Weather API',
+    ],
+    githubUrl: 'https://github.com/rutviknakum/smart_agrocare.git',
+    liveUrl: '',
+    imageAsset: 'assets/images/project2.png',
+    type: 'academic',
+  ),
+
+  Project(
     title: 'iEducation',
     description:
         'A scalable College Management System built with Flutter and Firebase. '

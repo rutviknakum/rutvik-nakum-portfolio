@@ -1,99 +1,201 @@
 import '../models/course_model.dart';
 
 final List<Course> coursesList = [
+  // ─── Flutter ───────────────────────────────────────────────
   Course(
-    name: 'Object-Oriented Programming (Java)',
-    code: 'OOP-101',
-    semester: 'Semester 1 & 3',
+    name: 'Mobile Application Development Via Flutter',
+    code: '-',
+    semester: 'Semester 3 / 5',
     level: 'UG',
     year: '2025 – Present',
     description:
-        'Introduces the principles of Object-Oriented Programming using Java. '
-        'Students learn to design and develop programs using classes, objects, '
-        'inheritance, polymorphism, abstraction, and encapsulation. '
-        'Emphasizes real-world problem solving through OOP design patterns.',
+        'This course focuses on developing cross-platform mobile applications using '
+        'Flutter and Dart. Students learn to build responsive and high-performance '
+        'apps with modern UI/UX, state management, API integration, and backend '
+        'connectivity. Emphasis is on real-world application development and deployment.',
     topics: [
-      'Classes & Objects',
-      'Constructors & Methods',
-      'Inheritance & Method Overriding',
-      'Polymorphism & Abstraction',
-      'Interfaces & Packages',
-      'Exception Handling',
-      'Collections Framework',
-      'File I/O in Java',
+      'Introduction to Flutter & Dart',
+      'Widgets & UI Design (Material & Cupertino)',
+      'Layouts & Responsive Design',
+      'Navigation & Routing',
+      'State Management (Provider / Riverpod)',
+      'API Integration & JSON Parsing',
+      'Firebase Integration (Auth, Firestore)',
+      'Local Storage & Offline Support',
+      'App Deployment & Performance Optimization',
     ],
-    driveUrl: '', // ← Google Drive link અહીં મૂકો
+    driveUrl: '',
+    gfgUrl: 'https://www.geeksforgeeks.org/flutter-tutorial/',
+    interviewBitUrl:
+        'https://www.interviewbit.com/flutter-interview-questions/',
+    youtubePlaylists: [
+      YoutubePlaylist(
+        title: 'Flutter Full Course – Rivaan Ranawat',
+        url:
+            'https://www.youtube.com/playlist?list=PL6yRaaP0WPkVtoeNIGqILtRAgd3h2CNpT',
+      ),
+      YoutubePlaylist(
+        title: 'Flutter Tutorial – Net Ninja',
+        url:
+            'https://www.youtube.com/playlist?list=PL4cUxeGkcC9jLYyp2Aoh6hcWuxFDX6PBJ',
+      ),
+    ],
   ),
 
+  // ─── Cloud Computing ───────────────────────────────────────
+  Course(
+    name: 'Cloud Computing',
+    code: 'C5360D2',
+    semester: 'Semester 3',
+    level: 'PG',
+    year: '2025-26',
+    description:
+        'Provides fundamental understanding of cloud computing, virtualization, '
+        'and service models. Covers architecture, deployment models, and tools '
+        'like CloudSim and VMware for practical implementation.',
+    topics: [
+      'Cloud Computing Overview & Characteristics',
+      'Cloud Architecture & Service Models (SaaS, PaaS, IaaS)',
+      'Cloud Deployment Models (Public, Private, Hybrid)',
+      'Virtualization & VMware Basics',
+      'CloudSim & GreenCloud Simulators',
+      'Cloud Security & Challenges',
+      'Resource Management & Scalability',
+    ],
+    driveUrl:
+        'https://drive.google.com/drive/folders/1bZCHFFbBlMoLh4oDNqwKwBRNn_t70Bjm?usp=sharing',
+    gfgUrl: 'https://www.geeksforgeeks.org/cloud-computing/',
+    interviewBitUrl:
+        'https://www.interviewbit.com/cloud-computing-interview-questions/',
+    youtubePlaylists: [
+      YoutubePlaylist(
+        title: 'Cloud Computing – Bhanu Priya',
+        url:
+            'https://www.youtube.com/playlist?list=PLrjkTql3jnm86_Jr9195OaqN-HeiBy49I',
+      ),
+      YoutubePlaylist(
+        title: 'Cloud Computing – Gate Smashers',
+        url:
+            'https://www.youtube.com/playlist?list=PLxCzCOWd7aiHRHVUtR-O52MsrdUSrzuy4',
+      ),
+    ],
+  ),
+
+  // ─── Artificial Intelligence ───────────────────────────────
+  Course(
+    name: 'Principles of Artificial Intelligence',
+    code: 'C4561C2',
+    semester: 'Semester 5',
+    level: 'UG',
+    year: '2025-26',
+    description:
+        'This course introduces core concepts of Artificial Intelligence including '
+        'problem solving, search techniques, knowledge representation, and NLP. '
+        'Students learn how intelligent agents work and how AI systems are designed '
+        'to solve real-world problems.',
+    topics: [
+      'Introduction to AI & Intelligent Agents',
+      'Problem Solving & Search Techniques (DFS, BFS, A*)',
+      'Heuristic Search & Optimization',
+      'Knowledge Representation (Predicate Logic, Semantic Networks)',
+      'Natural Language Processing (Parsing, Grammar)',
+      'Game Playing (Minimax, Alpha-Beta Pruning)',
+      'Planning Systems & Problem Reduction',
+    ],
+    driveUrl:
+        'https://drive.google.com/drive/folders/10__k94eVGy2Y96H7raRJMzWuglp5ZMiT?usp=sharing',
+    gfgUrl: 'https://www.geeksforgeeks.org/artificial-intelligence/',
+    interviewBitUrl:
+        'https://www.interviewbit.com/artificial-intelligence-interview-questions/',
+    youtubePlaylists: [
+      YoutubePlaylist(
+        title: 'AI – Bhanu Priya',
+        url:
+            'https://www.youtube.com/playlist?list=PLrjkTql3jnm_yol-ZK1QqPSn5YSg0NF9r',
+      ),
+      YoutubePlaylist(
+        title: 'AI – Gate Smashers',
+        url:
+            'https://www.youtube.com/playlist?list=PLxCzCOWd7aiHRHVUtR-O52MsrdUSrzuy4',
+      ),
+    ],
+  ),
+
+  // ─── Computer Networks ─────────────────────────────────────
   Course(
     name: 'Computer Networks',
-    code: 'CN-201',
-    semester: 'Semester 2 & 4',
-    level: 'UG / PG',
+    code: 'C5260C3',
+    semester: 'Semester 2 (PG) & Semester 4 (UG)',
+    level: 'PG, UG',
     year: '2025 – Present',
     description:
-        'Covers the fundamental concepts of computer networking including '
-        'network models, protocols, and data communication. '
-        'Students gain understanding of how the internet works, '
-        'from physical transmission to application-layer protocols like HTTP and DNS.',
+        'Covers layered architecture of computer networks including OSI and TCP/IP '
+        'models. Students learn about protocols, routing, data transmission, and '
+        'network applications like HTTP, DNS, and email systems.',
     topics: [
-      'OSI & TCP/IP Models',
-      'Data Link Layer & Framing',
-      'IP Addressing & Subnetting',
-      'Routing Algorithms (RIP, OSPF)',
-      'TCP vs UDP',
-      'DNS, HTTP, FTP Protocols',
-      'Network Security Basics',
-      'Wireless Networks & Wi-Fi',
+      'Introduction to Networks & OSI/TCP-IP Models',
+      'Physical Layer & Transmission Media',
+      'Data Link Layer & Error Detection',
+      'MAC Protocols (ALOHA, CSMA/CD)',
+      'Routing Algorithms & Network Layer',
+      'Transport Layer (TCP/UDP)',
+      'Application Layer (DNS, HTTP, Email)',
     ],
-    driveUrl: '', // ← Google Drive link અહીં મૂકો
+    driveUrl:
+        'https://drive.google.com/drive/folders/1s2r2n3Icx88U96YSvNmvT5FpPkLsAo8I?usp=sharing',
+    gfgUrl: 'https://www.geeksforgeeks.org/computer-network-tutorials/',
+    interviewBitUrl:
+        'https://www.interviewbit.com/networking-interview-questions/',
+    youtubePlaylists: [
+      YoutubePlaylist(
+        title: 'Computer Networks – Neso Academy',
+        url:
+            'https://www.youtube.com/playlist?list=PLBlnK6fEyqRgMCUAG0XRw78UA8qnv6jEx',
+      ),
+      YoutubePlaylist(
+        title: 'Computer Networks – Gate Smashers',
+        url:
+            'https://www.youtube.com/playlist?list=PLxCzCOWd7aiGFBD2-2joCpWOLUrDLvVV_',
+      ),
+    ],
   ),
 
+  // ─── Java OOP ──────────────────────────────────────────────
   Course(
-    name: 'Programming Fundamentals',
-    code: 'PF-101',
-    semester: 'Semester 1',
+    name: 'Object-Oriented Programming Using Java',
+    code: 'C4361C2',
+    semester: 'Semester 3',
     level: 'UG',
-    year: '2025 – Present',
+    year: '2025-26',
     description:
-        'An introductory course for first-year students covering the basics '
-        'of programming logic and problem solving. Uses C language to teach '
-        'core concepts like variables, loops, functions, and arrays. '
-        'Builds a strong foundation for all future programming courses.',
+        'Focuses on core Java programming and OOP concepts such as classes, '
+        'inheritance, polymorphism, and exception handling. Includes file handling '
+        'and real-world application development using Java.',
     topics: [
-      'Introduction to Programming & C',
-      'Variables, Data Types & Operators',
-      'Conditional Statements (if/else, switch)',
-      'Loops (for, while, do-while)',
-      'Functions & Recursion',
-      'Arrays & Strings',
-      'Pointers & Memory',
-      'Structures & File Handling',
+      'Java Basics & Data Types',
+      'Control Statements & Loops',
+      'Classes, Objects & Constructors',
+      'Inheritance & Polymorphism',
+      'Interfaces & Packages',
+      'Exception Handling',
+      'File Handling & I/O Streams',
     ],
-    driveUrl: '', // ← Google Drive link અહીં મૂકો
-  ),
-
-  Course(
-    name: 'Mobile App Development',
-    code: 'MAD-401',
-    semester: 'Semester 7',
-    level: 'UG',
-    year: '2025 – Present',
-    description:
-        'Focuses on building cross-platform mobile applications using Flutter. '
-        'Students learn Dart programming, UI design with Flutter widgets, '
-        'state management, and Firebase integration. '
-        'Course includes hands-on mini-projects and a final app submission.',
-    topics: [
-      'Dart Language Basics',
-      'Flutter Widgets & Layouts',
-      'Stateful & Stateless Widgets',
-      'Navigation & Routing',
-      'State Management (Provider/Riverpod)',
-      'Firebase Auth & Firestore',
-      'REST API Integration',
-      'App Deployment (Play Store / Web)',
+    driveUrl:
+        'https://drive.google.com/drive/folders/1fNeEF-sA56Avpg9ge_r11qIt0sNu7gEA?usp=sharing',
+    gfgUrl:
+        'https://www.geeksforgeeks.org/object-oriented-programming-oops-concept-in-java/',
+    interviewBitUrl: 'https://www.interviewbit.com/java-interview-questions/',
+    youtubePlaylists: [
+      YoutubePlaylist(
+        title: 'Java OOP – Apna College',
+        url:
+            'https://www.youtube.com/playlist?list=PLfqMhTWNBTe3LtFWcvwpqTkUSlB32kJop',
+      ),
+      YoutubePlaylist(
+        title: 'Java Full Course – Telusko',
+        url:
+            'https://www.youtube.com/playlist?list=PLsyeobzWxl7oZ-fxDYkOToURHhMuWD1BK',
+      ),
     ],
-    driveUrl: '', // ← Google Drive link અહીં મૂકો
   ),
 ];

@@ -4,9 +4,12 @@ class Course {
   final String semester;
   final String level;
   final String year;
-  final String description; // ← NEW
-  final List<String> topics; // ← NEW
-  final String driveUrl; // ← NEW
+  final String description;
+  final List<String> topics;
+  final String driveUrl;
+  final String interviewBitUrl; // ← NEW
+  final String gfgUrl;
+  final List<YoutubePlaylist> youtubePlaylists; // ← String ની જગ્યાએ List
 
   const Course({
     required this.name,
@@ -17,5 +20,16 @@ class Course {
     this.description = '',
     this.topics = const [],
     this.driveUrl = '',
+    this.interviewBitUrl = '', // ← NEW
+    this.gfgUrl = '',
+    this.youtubePlaylists = const [], // ← NEW
   });
+}
+
+// ← NEW Class
+class YoutubePlaylist {
+  final String title;
+  final String url;
+
+  const YoutubePlaylist({required this.title, required this.url});
 }
