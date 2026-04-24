@@ -5,10 +5,13 @@ final List<Project> projectsList = [
     title: 'iEducation',
     description:
         'A scalable College Management System built with Flutter and Firebase. '
-        'Features role-based access control for Admin, Faculty and Students '
-        'with real-time data handling and seamless user experience.',
-    technologies: ['Flutter', 'Dart', 'Firebase'],
-    githubUrl: 'https://github.com/rutviknakum',
+        'Features role-based access control for Admin, Faculty and Students. '
+        'Admin can manage users, departments, and timetables. Faculty can upload '
+        'assignments, mark attendance, and post announcements. Students get '
+        'real-time updates on results, notices, and schedules. '
+        'Built with clean architecture and seamless UX.',
+    technologies: ['Flutter', 'Dart', 'Firebase', 'Firestore', 'Firebase Auth'],
+    githubUrl: 'https://github.com/rutviknakum/iEducation',
     liveUrl: '',
     imageAsset: 'assets/images/project1.png',
     type: 'academic',
@@ -17,26 +20,47 @@ final List<Project> projectsList = [
   Project(
     title: 'We Split',
     description:
-        'A shared expense management app that simplifies group expense '
-        'tracking. Designed with clean system architecture and '
-        'user-friendly workflows for splitting bills effortlessly.',
-    technologies: ['Flutter', 'Dart', 'Firebase'],
-    githubUrl: 'https://github.com/rutviknakum',
+        'A shared expense management app that simplifies group bill splitting. '
+        'Users can create groups, add members, and log shared expenses. '
+        'The app automatically calculates who owes whom and shows a clear '
+        'settlement summary. Designed with clean system architecture, '
+        'real-time sync via Firebase, and user-friendly workflows.',
+    technologies: ['Flutter', 'Dart', 'Firebase', 'Firestore'],
+    githubUrl: 'https://github.com/rutviknakum/we_spilit',
     liveUrl: '',
     imageAsset: 'assets/images/project2.png',
     type: 'personal',
   ),
 
   Project(
-    title: 'Discussion Forum',
+    title: 'Num To Words',
     description:
-        'A database-driven discussion platform designed for academic '
-        'communities. Optimized PostgreSQL queries for fast performance '
-        'and efficient data retrieval.',
-    technologies: ['PostgreSQL', 'SQL'],
-    githubUrl: 'https://github.com/rutviknakum',
+        'A Flutter-based mobile application that converts numeric input '
+        'into words in three languages — English, Gujarati, and Hindi. '
+        'Supports real-time conversion as the user types, voice recognition '
+        'via speech_to_text package for hands-free input, and handles '
+        'large numbers including crores and billions. '
+        'Clean UI with multi-language toggle.',
+    technologies: ['Flutter', 'Dart', 'speech_to_text', 'Multilingual'],
+    githubUrl: 'https://github.com/rutviknakum/Num_To_Words',
     liveUrl: '',
     imageAsset: 'assets/images/project3.png',
+    type: 'personal',
+  ),
+
+  Project(
+    title: 'Discussion Forum',
+    description:
+        'A database-driven discussion platform built for academic communities. '
+        'Students and faculty can post questions, reply to threads, and '
+        'upvote helpful answers. Features include category-based filtering, '
+        'search functionality, and user authentication. '
+        'Optimized PostgreSQL queries with indexing for fast data retrieval '
+        'even under high load.',
+    technologies: ['PostgreSQL', 'SQL', 'Database Design', 'Indexing'],
+    githubUrl: '', // GitHub repo ન હોય તો blank રાખો
+    liveUrl: '',
+    imageAsset: 'assets/images/project4.png',
     type: 'academic',
   ),
 ];

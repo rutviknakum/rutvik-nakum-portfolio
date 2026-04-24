@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../constants/app_colors.dart';
 import '../data/projects_data.dart';
 import '../widgets/section_title.dart';
@@ -33,7 +34,6 @@ class _ProjectsSectionState extends State<ProjectsSection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Header Row ──────────────────────────────
           FadeInDown(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -51,12 +51,8 @@ class _ProjectsSectionState extends State<ProjectsSection> {
             ),
           ),
           const SizedBox(height: 24),
-
-          // ── Filter Tabs ─────────────────────────────
           FadeInUp(child: _filterRow(isMobile)),
           const SizedBox(height: 36),
-
-          // ── Project Cards ───────────────────────────
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 400),
             transitionBuilder: (child, animation) =>
@@ -70,7 +66,6 @@ class _ProjectsSectionState extends State<ProjectsSection> {
     );
   }
 
-  // ─── Filter Row ───────────────────────────────────────────
   Widget _filterRow(bool isMobile) {
     final filters = [
       {'key': 'all', 'label': 'All Projects', 'icon': Icons.grid_view_rounded},
@@ -95,12 +90,12 @@ class _ProjectsSectionState extends State<ProjectsSection> {
               border: Border.all(
                 color: isSelected
                     ? AppColors.primary
-                    : AppColors.primary.withOpacity(0.2),
+                    : AppColors.primary.withValues(alpha: 0.2),
               ),
               boxShadow: isSelected
                   ? [
                       BoxShadow(
-                        color: AppColors.primary.withOpacity(0.25),
+                        color: AppColors.primary.withValues(alpha: 0.25),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -132,7 +127,6 @@ class _ProjectsSectionState extends State<ProjectsSection> {
     );
   }
 
-  // ─── Desktop Grid ─────────────────────────────────────────
   Widget _desktopGrid({Key? key}) {
     final projects = _filtered;
     return GridView.builder(
@@ -148,12 +142,14 @@ class _ProjectsSectionState extends State<ProjectsSection> {
       itemCount: projects.length,
       itemBuilder: (_, i) => FadeInUp(
         delay: Duration(milliseconds: i * 100),
-        child: _ProjectCard(project: projects[i]),
+        child: _ProjectCard(
+          project: projects[i],
+          onTap: () => _showProjectDetail(context, projects[i]),
+        ),
       ),
     );
   }
 
-  // ─── Mobile List ──────────────────────────────────────────
   Widget _mobileList({Key? key}) {
     final projects = _filtered;
     return Column(
@@ -166,19 +162,45 @@ class _ProjectsSectionState extends State<ProjectsSection> {
               padding: const EdgeInsets.only(bottom: 20),
               child: FadeInUp(
                 delay: Duration(milliseconds: e.key * 100),
-                child: _ProjectCard(project: e.value),
+                child: _ProjectCard(
+                  project: e.value,
+                  onTap: () => _showProjectDetail(context, e.value),
+                ),
               ),
             ),
           )
           .toList(),
     );
   }
+
+  // ─── Project Detail Dialog ────────────────────────────────
+  void _showProjectDetail(BuildContext context, dynamic project) {
+    final isMobile = MediaQuery.of(context).size.width < 800;
+
+    if (isMobile) {
+      // Mobile: Bottom Sheet
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (_) => _ProjectDetailSheet(project: project),
+      );
+    } else {
+      // Desktop: Dialog
+      showDialog(
+        context: context,
+        builder: (_) => _ProjectDetailDialog(project: project),
+      );
+    }
+  }
 }
 
 // ─── Project Card Widget ──────────────────────────────────────
 class _ProjectCard extends StatefulWidget {
   final dynamic project;
-  const _ProjectCard({required this.project});
+  final VoidCallback onTap; // ← NEW
+
+  const _ProjectCard({required this.project, required this.onTap});
 
   @override
   State<_ProjectCard> createState() => _ProjectCardState();
@@ -214,191 +236,587 @@ class _ProjectCardState extends State<_ProjectCard> {
     return MouseRegion(
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOutCubic,
-        transform: Matrix4.translationValues(0, _hovered ? -6 : 0, 0),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: _hovered
-                ? _typeColor.withOpacity(0.5)
-                : AppColors.primary.withOpacity(0.12),
-            width: _hovered ? 1.5 : 1,
-          ),
-          boxShadow: [
-            BoxShadow(
+      cursor: SystemMouseCursors.click, // ← pointer cursor
+      child: GestureDetector(
+        onTap: widget.onTap, // ← Click handler
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOutCubic,
+          transform: Matrix4.translationValues(0, _hovered ? -6 : 0, 0),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
               color: _hovered
-                  ? _typeColor.withOpacity(0.15)
-                  : Colors.black.withOpacity(0.04),
-              blurRadius: _hovered ? 24 : 8,
-              offset: const Offset(0, 8),
+                  ? _typeColor.withValues(alpha: 0.5)
+                  : AppColors.primary.withValues(alpha: 0.12),
+              width: _hovered ? 1.5 : 1,
             ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ── Top Row: Icon + Badge ──────────────
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Project Icon
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: _hovered
-                          ? _typeColor.withOpacity(0.15)
-                          : AppColors.primary.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(
-                      Icons.rocket_launch_outlined,
-                      color: _hovered ? _typeColor : AppColors.primary,
-                      size: 20,
-                    ),
-                  ),
-
-                  // Type Badge
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _typeColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      _typeLabel,
-                      style: GoogleFonts.poppins(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        color: _typeColor,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // ── Title ──────────────────────────────
-              Text(
-                widget.project.title as String,
-                style: GoogleFonts.poppins(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                  height: 1.3,
-                ),
-              ),
-              const SizedBox(height: 8),
-
-              // ── Description ────────────────────────
-              Expanded(
-                child: Text(
-                  widget.project.description as String,
-                  style: GoogleFonts.roboto(
-                    fontSize: 13,
-                    color: AppColors.textSecondary,
-                    height: 1.6,
-                  ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // ── Tech Tags ──────────────────────────
-              Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: (widget.project.technologies as List)
-                    .map(
-                      (tech) => Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.surfaceAlt,
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(
-                            color: AppColors.primary.withOpacity(0.15),
-                          ),
-                        ),
-                        child: Text(
-                          tech as String,
-                          style: GoogleFonts.roboto(
-                            fontSize: 11,
-                            color: AppColors.textMuted,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    )
-                    .toList(),
-              ),
-              const SizedBox(height: 16),
-
-              // ── Bottom: Links ──────────────────────
-              Row(
-                children: [
-                  if ((widget.project.githubUrl as String).isNotEmpty)
-                    _linkButton(
-                      icon: Icons.code_rounded,
-                      label: 'Code',
-                      onTap: () {},
-                    ),
-                  const SizedBox(width: 10),
-                  if ((widget.project.liveUrl as String).isNotEmpty)
-                    _linkButton(
-                      icon: Icons.open_in_new_rounded,
-                      label: 'Live',
-                      onTap: () {},
-                    ),
-                ],
+            boxShadow: [
+              BoxShadow(
+                color: _hovered
+                    ? _typeColor.withValues(alpha: 0.15)
+                    : Colors.black.withValues(alpha: 0.04),
+                blurRadius: _hovered ? 24 : 8,
+                offset: const Offset(0, 8),
               ),
             ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 250),
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: _hovered
+                            ? _typeColor.withValues(alpha: 0.15)
+                            : AppColors.primary.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(
+                        Icons.rocket_launch_outlined,
+                        color: _hovered ? _typeColor : AppColors.primary,
+                        size: 20,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _typeColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        _typeLabel,
+                        style: GoogleFonts.poppins(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: _typeColor,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  widget.project.title as String,
+                  style: GoogleFonts.poppins(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                    height: 1.3,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Expanded(
+                  child: Text(
+                    widget.project.description as String,
+                    style: GoogleFonts.roboto(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                      height: 1.6,
+                    ),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: (widget.project.technologies as List)
+                      .map(
+                        (tech) => Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceAlt,
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: AppColors.primary.withValues(alpha: 0.15),
+                            ),
+                          ),
+                          child: Text(
+                            tech as String,
+                            style: GoogleFonts.roboto(
+                              fontSize: 11,
+                              color: AppColors.textMuted,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+                const SizedBox(height: 12),
+                // ── "Tap to view details" hint ──
+                Row(
+                  children: [
+                    Icon(
+                      Icons.touch_app_outlined,
+                      size: 13,
+                      color: AppColors.primary.withValues(alpha: 0.6),
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      'Tap for details',
+                      style: GoogleFonts.roboto(
+                        fontSize: 11,
+                        color: AppColors.primary.withValues(alpha: 0.6),
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+}
 
-  Widget _linkButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
+// ─── Desktop Detail Dialog ────────────────────────────────────
+class _ProjectDetailDialog extends StatelessWidget {
+  final dynamic project;
+  const _ProjectDetailDialog({required this.project});
+
+  Color get _typeColor {
+    switch (project.type) {
+      case 'academic':
+        return AppColors.primary;
+      case 'personal':
+        return AppColors.warning;
+      default:
+        return AppColors.textMuted;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+        width: 600,
+        constraints: const BoxConstraints(maxHeight: 600),
         decoration: BoxDecoration(
-          color: AppColors.primary.withOpacity(0.08),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 40,
+              offset: const Offset(0, 16),
+            ),
+          ],
         ),
-        child: Row(
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 14, color: AppColors.primary),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: GoogleFonts.poppins(
-                fontSize: 12,
-                color: AppColors.primary,
-                fontWeight: FontWeight.w600,
+            // ── Header ──
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: _typeColor.withValues(alpha: 0.06),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
+                border: Border(
+                  bottom: BorderSide(
+                    color: AppColors.primary.withValues(alpha: 0.1),
+                  ),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: _typeColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.rocket_launch_outlined,
+                      color: _typeColor,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          project.title as String,
+                          style: GoogleFonts.poppins(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        Container(
+                          margin: const EdgeInsets.only(top: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: _typeColor.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            project.type.toString().toUpperCase(),
+                            style: GoogleFonts.poppins(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: _typeColor,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Close button
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close_rounded),
+                    color: AppColors.textMuted,
+                  ),
+                ],
+              ),
+            ),
+
+            // ── Scrollable Body ──
+            Flexible(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Description
+                    Text(
+                      'About this Project',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      project.description as String,
+                      style: GoogleFonts.roboto(
+                        fontSize: 14,
+                        color: AppColors.textSecondary,
+                        height: 1.7,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Technologies
+                    Text(
+                      'Technologies Used',
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: (project.technologies as List)
+                          .map(
+                            (tech) => Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withValues(
+                                  alpha: 0.08,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.2,
+                                  ),
+                                ),
+                              ),
+                              child: Text(
+                                tech as String,
+                                style: GoogleFonts.roboto(
+                                  fontSize: 12,
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Action Buttons
+                    Row(
+                      children: [
+                        if ((project.githubUrl as String).isNotEmpty)
+                          Expanded(
+                            child: _DetailActionButton(
+                              icon: Icons.code_rounded,
+                              label: 'View on GitHub',
+                              url: project.githubUrl as String,
+                              isPrimary: true,
+                            ),
+                          ),
+                        if ((project.githubUrl as String).isNotEmpty &&
+                            (project.liveUrl as String).isNotEmpty)
+                          const SizedBox(width: 12),
+                        if ((project.liveUrl as String).isNotEmpty)
+                          Expanded(
+                            child: _DetailActionButton(
+                              icon: Icons.open_in_new_rounded,
+                              label: 'Live Demo',
+                              url: project.liveUrl as String,
+                              isPrimary: false,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Mobile Bottom Sheet ──────────────────────────────────────
+class _ProjectDetailSheet extends StatelessWidget {
+  final dynamic project;
+  const _ProjectDetailSheet({required this.project});
+
+  Color get _typeColor {
+    switch (project.type) {
+      case 'academic':
+        return AppColors.primary;
+      case 'personal':
+        return AppColors.warning;
+      default:
+        return AppColors.textMuted;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
+      ),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Drag Handle
+          Container(
+            margin: const EdgeInsets.only(top: 12, bottom: 8),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: AppColors.textMuted.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+
+          // Header
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: _typeColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    Icons.rocket_launch_outlined,
+                    color: _typeColor,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    project.title as String,
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close_rounded),
+                  color: AppColors.textMuted,
+                ),
+              ],
+            ),
+          ),
+
+          // Body
+          Flexible(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    project.description as String,
+                    style: GoogleFonts.roboto(
+                      fontSize: 14,
+                      color: AppColors.textSecondary,
+                      height: 1.7,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Technologies',
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: (project.technologies as List)
+                        .map(
+                          (tech) => Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: AppColors.primary.withValues(alpha: 0.2),
+                              ),
+                            ),
+                            child: Text(
+                              tech as String,
+                              style: GoogleFonts.roboto(
+                                fontSize: 12,
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Buttons
+                  if ((project.githubUrl as String).isNotEmpty)
+                    _DetailActionButton(
+                      icon: Icons.code_rounded,
+                      label: 'View on GitHub',
+                      url: project.githubUrl as String,
+                      isPrimary: true,
+                      fullWidth: true,
+                    ),
+                  if ((project.liveUrl as String).isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    _DetailActionButton(
+                      icon: Icons.open_in_new_rounded,
+                      label: 'Live Demo',
+                      url: project.liveUrl as String,
+                      isPrimary: false,
+                      fullWidth: true,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Action Button (Shared) ───────────────────────────────────
+class _DetailActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String url;
+  final bool isPrimary;
+  final bool fullWidth;
+
+  const _DetailActionButton({
+    required this.icon,
+    required this.label,
+    required this.url,
+    required this.isPrimary,
+    this.fullWidth = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: fullWidth ? double.infinity : null,
+      child: ElevatedButton.icon(
+        onPressed: () async {
+          final uri = Uri.parse(url);
+          if (await canLaunchUrl(uri)) {
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+          }
+        },
+        icon: Icon(icon, size: 16),
+        label: Text(
+          label,
+          style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w600),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isPrimary ? AppColors.primary : AppColors.surface,
+          foregroundColor: isPrimary ? Colors.white : AppColors.primary,
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+            side: isPrimary
+                ? BorderSide.none
+                : BorderSide(color: AppColors.primary.withValues(alpha: 0.3)),
+          ),
         ),
       ),
     );
