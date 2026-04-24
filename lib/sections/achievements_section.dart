@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:animate_do/animate_do.dart';
 import '../constants/app_colors.dart';
 import '../widgets/section_title.dart';
 
@@ -22,40 +21,28 @@ class AchievementsSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SectionTitle(title: 'Achievements'),
+          const SizedBox(height: 32),
 
-          // ── Certifications ─────────────────────────
-          FadeInUp(
-            child: _sectionHeading(
-              Icons.workspace_premium_outlined,
-              'Certifications',
-            ),
-          ),
+          _sectionHeading(Icons.workspace_premium_outlined, 'Certifications'),
           const SizedBox(height: 20),
-          FadeInUp(
-            delay: const Duration(milliseconds: 100),
-            child: isMobile ? _certListMobile() : _certGridDesktop(),
-          ),
+
+          isMobile ? _certListMobile() : _certGridDesktop(),
 
           const SizedBox(height: 52),
 
-          // ── Stats Row ──────────────────────────────
-          FadeInUp(
-            delay: const Duration(milliseconds: 200),
-            child: _statsRow(isMobile),
-          ),
+          _statsRow(isMobile),
         ],
       ),
     );
   }
 
-  // ─── Section Heading ─────────────────────────────────────
   Widget _sectionHeading(IconData icon, String title) {
     return Row(
       children: [
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: AppColors.primary.withOpacity(0.12),
+            color: AppColors.primary.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, color: AppColors.primary, size: 20),
@@ -73,51 +60,45 @@ class AchievementsSection extends StatelessWidget {
     );
   }
 
-  // ─── Certifications Desktop Grid ─────────────────────────
   Widget _certGridDesktop() {
+    final items = _certItems();
+
     return Row(
-      children: _certItems()
-          .map(
-            (cert) => Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(right: 16),
-                child: _certCard(
-                  cert['icon'] as IconData,
-                  cert['title'] as String,
-                  cert['org'] as String,
-                  cert['year'] as String,
-                  cert['desc'] as String,
-                  cert['color'] as Color,
-                ),
-              ),
+      children: items.asMap().entries.map((e) {
+        final isLast = e.key == items.length - 1;
+        return Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(right: isLast ? 0 : 16),
+            child: _certCard(
+              e.value['icon'] as IconData,
+              e.value['title'] as String,
+              e.value['org'] as String,
+              e.value['year'] as String,
+              e.value['desc'] as String,
             ),
-          )
-          .toList(),
+          ),
+        );
+      }).toList(),
     );
   }
 
-  // ─── Certifications Mobile List ───────────────────────────
   Widget _certListMobile() {
     return Column(
-      children: _certItems()
-          .map(
-            (cert) => Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: _certCard(
-                cert['icon'] as IconData,
-                cert['title'] as String,
-                cert['org'] as String,
-                cert['year'] as String,
-                cert['desc'] as String,
-                cert['color'] as Color,
-              ),
-            ),
-          )
-          .toList(),
+      children: _certItems().map((cert) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: _certCard(
+            cert['icon'] as IconData,
+            cert['title'] as String,
+            cert['org'] as String,
+            cert['year'] as String,
+            cert['desc'] as String,
+          ),
+        );
+      }).toList(),
     );
   }
 
-  // ─── Cert Data ────────────────────────────────────────────
   List<Map<String, dynamic>> _certItems() => [
     {
       'icon': Icons.school_outlined,
@@ -125,7 +106,6 @@ class AchievementsSection extends StatelessWidget {
       'org': 'Academic Institution',
       'year': '2025',
       'desc': 'Innovative Teaching, OBE\n& Learner-Centric Methodologies',
-      'color': AppColors.primary,
     },
     {
       'icon': Icons.flutter_dash,
@@ -133,7 +113,6 @@ class AchievementsSection extends StatelessWidget {
       'org': 'Open Source Program',
       'year': '2024',
       'desc': 'Open Source Flutter\nDevelopment Contribution',
-      'color': AppColors.success,
     },
     {
       'icon': Icons.phone_android,
@@ -141,28 +120,25 @@ class AchievementsSection extends StatelessWidget {
       'org': 'Certification Program',
       'year': '2023',
       'desc': 'Mobile Application\nDevelopment Fundamentals',
-      'color': AppColors.warning,
     },
   ];
 
-  // ─── Cert Card ────────────────────────────────────────────
   Widget _certCard(
     IconData icon,
     String title,
     String org,
     String year,
     String desc,
-    Color color,
   ) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withOpacity(0.25)),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.06),
+            color: AppColors.primary.withValues(alpha: 0.06),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -171,17 +147,16 @@ class AchievementsSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Icon + Year Row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.12),
+                  color: AppColors.primary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(icon, color: color, size: 22),
+                child: Icon(icon, color: AppColors.primary, size: 22),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(
@@ -189,7 +164,7 @@ class AchievementsSection extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.12),
+                  color: AppColors.primary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -197,7 +172,7 @@ class AchievementsSection extends StatelessWidget {
                   style: GoogleFonts.poppins(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: color,
+                    color: AppColors.primary,
                   ),
                 ),
               ),
@@ -205,7 +180,6 @@ class AchievementsSection extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          // Title
           Text(
             title,
             style: GoogleFonts.poppins(
@@ -217,18 +191,16 @@ class AchievementsSection extends StatelessWidget {
           ),
           const SizedBox(height: 6),
 
-          // Org
           Text(
             org,
             style: GoogleFonts.roboto(
               fontSize: 12,
-              color: color,
+              color: AppColors.primary,
               fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 8),
 
-          // Description
           Text(
             desc,
             style: GoogleFonts.roboto(
@@ -242,7 +214,6 @@ class AchievementsSection extends StatelessWidget {
     );
   }
 
-  // ─── Stats Row ────────────────────────────────────────────
   Widget _statsRow(bool isMobile) {
     final stats = [
       {'value': '1+', 'label': 'Year\nTeaching', 'icon': Icons.school},
@@ -264,41 +235,36 @@ class AchievementsSection extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
       ),
       child: isMobile
           ? Wrap(
               spacing: 16,
               runSpacing: 24,
-              children: stats
-                  .map(
-                    (s) => SizedBox(
-                      width: 140,
-                      child: _statItem(
-                        s['icon'] as IconData,
-                        s['value'] as String,
-                        s['label'] as String,
-                      ),
-                    ),
-                  )
-                  .toList(),
+              children: stats.map((s) {
+                return SizedBox(
+                  width: 140,
+                  child: _statItem(
+                    s['icon'] as IconData,
+                    s['value'] as String,
+                    s['label'] as String,
+                  ),
+                );
+              }).toList(),
             )
           : Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: stats
-                  .map(
-                    (s) => _statItem(
-                      s['icon'] as IconData,
-                      s['value'] as String,
-                      s['label'] as String,
-                    ),
-                  )
-                  .toList(),
+              children: stats.map((s) {
+                return _statItem(
+                  s['icon'] as IconData,
+                  s['value'] as String,
+                  s['label'] as String,
+                );
+              }).toList(),
             ),
     );
   }
 
-  // ─── Stat Item ────────────────────────────────────────────
   Widget _statItem(IconData icon, String value, String label) {
     return Column(
       children: [
